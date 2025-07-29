@@ -51,6 +51,7 @@ spec:
       taskRef:
         kind: ClusterTask
         name: git-clone
+        apiVersion: tekton.dev/v1beta1
       workspaces:
         - name: output
           workspace: shared-workspace
@@ -68,6 +69,7 @@ spec:
       taskRef:
         kind: ClusterTask
         name: git-clone
+        apiVersion: tekton.dev/v1beta1
       workspaces:
         - name: output
           workspace: shared-workspace
@@ -85,6 +87,7 @@ spec:
       taskRef:
         kind: ClusterTask
         name: git-clone
+        apiVersion: tekton.dev/v1beta1
       workspaces:
         - name: output
           workspace: shared-workspace
@@ -100,6 +103,7 @@ spec:
       taskRef:
         kind: Task
         name: resolve-props
+        apiVersion: tekton.dev/v1beta1
       workspaces:
         - name: input
           workspace: shared-workspace
@@ -141,6 +145,7 @@ spec:
       taskRef:
         kind: Task
         name: create-config
+        apiVersion: tekton.dev/v1beta1
       workspaces:
         - name: workspace
           workspace: shared-workspace
@@ -150,6 +155,7 @@ spec:
       taskRef:
         kind: Task
         name: github-open-pr
+        apiVersion: tekton.dev/v1beta1
       runAfter:
         - create-config
       params:
