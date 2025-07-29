@@ -38,6 +38,7 @@ spec:
   results:
     - description: ""
       name: configurations
+      type: string
   steps:
     - name: setup-configuration
       env:
