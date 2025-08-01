@@ -11,7 +11,7 @@ metadata:
     version: 0.0.0
 spec:
   params:
-    - name: is-source-directory
+    - name: ir-source-directory
       type: string
     - default: ibm-client.jks
       name: key-certs-secret-name
@@ -45,7 +45,7 @@ spec:
           -Djavax.net.ssl.keyStoreType=jks \
           -Djavax.net.ssl.keyStore=/client-certs/ibm-client.jks \
           -Djavax.net.ssl.keyStorePassword=${KEYSTORE_PASSWORD} \
-          -n -t $(workspaces.workspace.path)/$(params.is-source-directory)/$(params.test-plan) \
+          -n -t $(workspaces.workspace.path)/$(params.ir-source-directory)/$(params.test-plan) \
           -Jjmeter_users=$jmeter_users \
           -l /tmp/report.jtl
 

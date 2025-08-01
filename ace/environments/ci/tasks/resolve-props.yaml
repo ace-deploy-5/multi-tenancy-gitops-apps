@@ -12,13 +12,13 @@ spec:
     - name: ir-configuration-keystore
     - name: ir-configuration-truststore
     - name: ir-configuration-setdbparms
-    - name: ir-configuration-serverconf
+    - name: ir-configuration-runtimeconf
     - name: ir-configuration-policyproject
     - name: ir-configuration-loopbackdatasource
     - name: mq-queue-name
     - name: mq-end-point-policy-file
     - name: registry-host
-    - name: previous-is-genenration
+    - name: previous-ir-genenration
     - name: previous-deployment-revision
     - name: endpoint-path
     - name: ir-configurations
@@ -54,27 +54,27 @@ spec:
           echo -n `yq e "$exp // \"\" " $properties_yaml_path` > $result_path
         }
 
-        resolve_props '.integrationServer.project' $(results.ir-project.path)
-        resolve_prop '.integrationServer.applicationName' $(results.ir-application-name.path)
-        resolve_prop '.integrationServer.releaseName' $(results.ir-release-name.path)
-        resolve_prop '.integrationServer.endpoint-path' $(results.endpoint-path.path)
-        resolve_props '.integrationServer.configurations.keystore' $(results.ir-configuration-keystore.path)
-        resolve_props '.integrationServer.configurations.truststore' $(results.ir-configuration-truststore.path)
-        resolve_props '.integrationServer.configurations.setdbparms' $(results.ir-configuration-setdbparms.path)
-        resolve_props '.integrationServer.configurations.serverconf' $(results.ir-configuration-serverconf.path)
-        resolve_props '.integrationServer.configurations.policyproject' $(results.ir-configuration-policyproject.path)
-        resolve_props '.integrationServer.configurations.loopbackdatasource' $(results.ir-configuration-loopbackdatasource.path)
+        resolve_props '.integrationRuntime.project' $(results.ir-project.path)
+        resolve_prop '.integrationRuntime.applicationName' $(results.ir-application-name.path)
+        resolve_prop '.integrationRuntime.releaseName' $(results.ir-release-name.path)
+        resolve_prop '.integrationRuntime.endpoint-path' $(results.endpoint-path.path)
+        resolve_props '.integrationRuntime.configurations.keystore' $(results.ir-configuration-keystore.path)
+        resolve_props '.integrationRuntime.configurations.truststore' $(results.ir-configuration-truststore.path)
+        resolve_props '.integrationRuntime.configurations.setdbparms' $(results.ir-configuration-setdbparms.path)
+        resolve_props '.integrationRuntime.configurations.runtimeconf' $(results.ir-configuration-runtimeconf.path)
+        resolve_props '.integrationRuntime.configurations.policyproject' $(results.ir-configuration-policyproject.path)
+        resolve_props '.integrationRuntime.configurations.loopbackdatasource' $(results.ir-configuration-loopbackdatasource.path)
 
         resolve_prop '.mq.queueName' $(results.mq-queue-name.path)
         resolve_prop '.mq.endPointPolicyFile' $(results.mq-end-point-policy-file.path)
 
-        resolve_props '.integrationServer.configurations.*' $(results.ir-configurations.path)
+        resolve_props '.integrationRuntime.configurations.*' $(results.ir-configurations.path)
 
-        resolve_prop '.integrationServer.license.license' $(results.ir-license.path)
-        resolve_prop '.integrationServer.license.use' $(results.ir-license-use.path)
-        resolve_prop '.integrationServer.service.endpointType' $(results.ir-service-endpoint-type.path)
-        resolve_prop '.integrationServer.version' $(results.ir-version.path)
-        resolve_prop '.integrationServer.baseImage' $(results.ir-base-image.path)
+        resolve_prop '.integrationRuntime.license.license' $(results.ir-license.path)
+        resolve_prop '.integrationRuntime.license.use' $(results.ir-license-use.path)
+        resolve_prop '.integrationRuntime.service.endpointType' $(results.ir-service-endpoint-type.path)
+        resolve_prop '.integrationRuntime.version' $(results.ir-version.path)
+        resolve_prop '.integrationRuntime.baseImage' $(results.ir-base-image.path)
 
     - name: resolve-ocp-properties
       image: quay.io/openshift/origin-cli:latest
@@ -84,7 +84,7 @@ spec:
         echo $release_name
 
         set +e
-        previous_ir_genenration=$(oc get integrationserver \
+        previous_ir_genenration=$(oc get integrationruntime \
                 $release_name -o jsonpath='{.metadata.generation}' 2>/dev/null)
         set +e
 
