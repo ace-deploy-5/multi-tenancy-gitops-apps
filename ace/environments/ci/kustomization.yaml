@@ -15,6 +15,7 @@ resources:
 # - pvc/ace-bar-pvc.yaml
  - pvc/ace-config-pvc.yaml
 # - pvc/ace-integration-server.yaml
+ - pvc/ace-integration-runtime.yaml
 # - pvc/ace-test-pvc.yaml
  - roles/custom-images-builder-role.yaml
  - roles/custom-images-builder-rolebinding.yaml
