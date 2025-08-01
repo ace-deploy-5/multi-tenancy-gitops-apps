@@ -1,11 +1,11 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: ace-integration-server
+  name: ace-integration-runtime
 spec:
   serviceAccountName: pipeline
   triggers:
-    - name: ace-integration-server
+    - name: ace-integration-runtime
       interceptors:
         - name: "Validate GitHub payload"
           ref:
@@ -22,9 +22,9 @@ spec:
             - name: filter
               value: body.ref == 'refs/heads/master'
       bindings:
-        - ref: ace-integration-server
+        - ref: ace-integration-runtime
       template:
-        ref: ace-integration-server
+        ref: ace-integration-runtime
   resources:
     kubernetesResource:
       spec:
