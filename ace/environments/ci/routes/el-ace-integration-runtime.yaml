@@ -1,11 +1,11 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: el-ace-integration-server
+  name: el-ace-integration-runtime
 spec:
   to:
     kind: Service
-    name: el-ace-integration-server
+    name: el-ace-integration-runtime
   port:
     targetPort: https-listener
   tls:

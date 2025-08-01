@@ -3,8 +3,8 @@ kind: Task
 metadata:
   name: ibm-gitops-for-ace
   annotations:
-    description: Promotes an ACE Integration Server Container Image by writing or opening a PR against gitops repo
-    app.openshift.io/description: Promotes an ACE Integration Server Container Image by writing or opening a PR against gitops repo
+    description: Promotes an ACE Integration Runtime Container Image by writing or opening a PR against gitops repo
+    app.openshift.io/description: Promotes an ACE Integration Runtime Container Image by writing or opening a PR against gitops repo
     app.openshift.io/vcs-uri: https://cloud-native-toolkit-demos/multi-tenancy-gitops-apps
     app.openshift.io/vcs-ref: master
   labels:
@@ -14,11 +14,11 @@ spec:
     - name: source-env
       default: ""
     - name: source-yaml
-      default: "integrationServer/IntegrationServerPatch.yaml"
+      default: "integrationRuntime/IntegrationRuntimePatch.yaml"
     - name: destination-env
       default: ""
     - name: destination-yaml
-      default: "integrationServer/IntegrationServerPatch.yaml"
+      default: "integrationRuntime/IntegrationRuntimePatch.yaml"
     - name: destination-image
       default: ""
     - name: git-pr

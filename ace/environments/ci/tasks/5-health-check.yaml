@@ -48,7 +48,7 @@ spec:
 
             echo "resource-type: $(params.resource-type)"
 
-            if [[ "$(params.resource-type)" == *"integrationserver"* ]]; then
+            if [[ "$(params.resource-type)" == *"integrationruntime"* ]]; then
                 HOST=$(kubectl get route/${APP_NAME}-${PROTOCOL} --namespace ${APP_NAMESPACE} --output=jsonpath='{ .spec.host }')
                 if [[ -z "${PROTOCOL}" ]]; then
                   PROTOCOL="https"

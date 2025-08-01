@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: ace-integration-server
+  name: ace-integration-runtime
 spec:
   params:
   - name: source-repo

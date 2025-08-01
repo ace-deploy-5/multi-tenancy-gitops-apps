@@ -4,21 +4,21 @@ metadata:
   name: create-config
 spec:
   params:
-    - name: is-config-directory
+    - name: ir-config-directory
       type: string
-    - name: is-infra-directory
+    - name: ir-infra-directory
       type: string
-    - name: is-configuration-keystore
+    - name: ir-configuration-keystore
       type: string
-    - name: is-configuration-truststore
+    - name: ir-configuration-truststore
       type: string
-    - name: is-configuration-setdbparms
+    - name: ir-configuration-setdbparms
       type: string
-    - name: is-configuration-serverconf
+    - name: ir-configuration-runtimeconf
       type: string
-    - name: is-configuration-policyproject
+    - name: ir-configuration-policyproject
       type: string
-    - name: is-configuration-loopbackdatasource
+    - name: ir-configuration-loopbackdatasource
       type: string
     - name: rendered-config-directory
       type: string
@@ -41,22 +41,22 @@ spec:
   steps:
     - name: setup-configuration
       env:
-        - name: IS_CONFIG_DIRECTORY
-          value: $(params.is-config-directory)
-        - name: IS_INFRA_DIRECTORY
-          value: $(params.is-infra-directory)
-        - name: IS_CONFIGURATION_KEYSTORE
-          value: $(params.is-configuration-keystore)
-        - name: IS_CONFIGURATION_TRUSTSTORE
-          value: $(params.is-configuration-truststore)
-        - name: IS_CONFIGURATION_SETDBPARMS
-          value: $(params.is-configuration-setdbparms)
-        - name: IS_CONFIGURATION_SERVERCONF
-          value: $(params.is-configuration-serverconf)
-        - name: IS_CONFIGURATION_POLICYPROJECT
-          value: $(params.is-configuration-policyproject)
-        - name: IS_CONFIGURATION_LOOPBACKDATASOURCE
-          value: $(params.is-configuration-loopbackdatasource)
+        - name: IR_CONFIG_DIRECTORY
+          value: $(params.ir-config-directory)
+        - name: IR_INFRA_DIRECTORY
+          value: $(params.ir-infra-directory)
+        - name: IR_CONFIGURATION_KEYSTORE
+          value: $(params.ir-configuration-keystore)
+        - name: IR_CONFIGURATION_TRUSTSTORE
+          value: $(params.ir-configuration-truststore)
+        - name: IR_CONFIGURATION_SETDBPARMS
+          value: $(params.ir-configuration-setdbparms)
+        - name: IR_CONFIGURATION_RUNTIMECONF
+          value: $(params.ir-configuration-runtimeconf)
+        - name: IR_CONFIGURATION_POLICYPROJECT
+          value: $(params.ir-configuration-policyproject)
+        - name: IR_CONFIGURATION_LOOPBACKDATASOURCE
+          value: $(params.ir-configuration-loopbackdatasource)
         - name: WORKSPACE_PATH
           value: $(workspaces.workspace.path)
         - name: RENDERED_CONFIG_DIRECTORY
@@ -67,9 +67,9 @@ spec:
 
         set -e
 
-        config_template_path=${WORKSPACE_PATH}/${IS_INFRA_DIRECTORY}
+        config_template_path=${WORKSPACE_PATH}/${IR_INFRA_DIRECTORY}
         rendered_config_directory=${RENDERED_CONFIG_DIRECTORY}
-        config_definition_path=${WORKSPACE_PATH}/${IS_CONFIG_DIRECTORY}
+        config_definition_path=${WORKSPACE_PATH}/${IR_CONFIG_DIRECTORY}
 
         create_configurations() {
           local type=$1
@@ -84,7 +84,7 @@ spec:
 
             e=$sanitised_config_name yq e -i '.spec.secretName = env(e)' $rendered_config_directory/$sanitised_file_name.yaml
             ;;
-          serverconf)
+          runtimeconf)
             cp $config_template_path/Configuration.yaml $rendered_config_directory/$sanitised_file_name.yaml
 
             contents=$(base64 -w 0 $config_definition_path/$config)
@@ -121,7 +121,7 @@ spec:
           local config_type=$1
 
           for config in ${!config_type}; do
-            local config_pattern='^IS_CONFIGURATION_(.+)'
+            local config_pattern='^IR_CONFIGURATION_(.+)'
             if [[ $config_type =~ $config_pattern ]]; then
               local type=$(echo "${BASH_REMATCH[1]}" | sed -e 's/\(.*\)/\L\1/')
             else
@@ -136,9 +136,9 @@ spec:
 
         configurations=""
 
-        for config_type in IS_CONFIGURATION_SERVERCONF IS_CONFIGURATION_SETDBPARMS \
-                      IS_CONFIGURATION_KEYSTORE IS_CONFIGURATION_TRUSTSTORE \
-                      IS_CONFIGURATION_POLICYPROJECT IS_CONFIGURATION_LOOPBACKDATASOURCE; do
+        for config_type in IR_CONFIGURATION_RUNTIMECONF IR_CONFIGURATION_SETDBPARMS \
+                      IR_CONFIGURATION_KEYSTORE IR_CONFIGURATION_TRUSTSTORE \
+                      IR_CONFIGURATION_POLICYPROJECT IR_CONFIGURATION_LOOPBACKDATASOURCE; do
 
           configurations="${configurations} $(process_configrations $config_type)"
 

@@ -1,12 +1,12 @@
 kind: Task
 apiVersion: tekton.dev/v1beta1
 metadata:
-  name: build-integration-server
+  name: build-integration-runtime
 spec:
   params:
-    - name: is_manifest_template
+    - name: ir_manifest_template
       type: string
-    - name: destination_is_manifest
+    - name: destination_ir_manifest
       type: string
     - name: configurations
       type: string
@@ -42,10 +42,10 @@ spec:
       image: image-registry.openshift-image-registry.svc:5000/ci/sh-tools
       workingDir: $(workspaces.input.path)
       env:
-        - name: IS_MANIFEST_TEMPLATE
-          value: $(params.is_manifest_template)
-        - name: DESTINATION_IS_MANIFEST
-          value: $(params.destination_is_manifest)
+        - name: IR_MANIFEST_TEMPLATE
+          value: $(params.ir_manifest_template)
+        - name: DESTINATION_IR_MANIFEST
+          value: $(params.destination_ir_manifest)
         - name: CONFIGURATIONS
           value: $(params.configurations)z
         - name: NAME
@@ -65,22 +65,22 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        function create_integration_server() {
-          envsubst < ${IS_MANIFEST_TEMPLATE} > ${DESTINATION_IS_MANIFEST}
+        function create_integration_runtime() {
+          envsubst < ${IR_MANIFEST_TEMPLATE} > ${DESTINATION_IR_MANIFEST}
 
           for configuration in ${CONFIGURATIONS} ; do
-            config=$configuration yq e -i '.spec.configurations = (.spec.configurations // []) + env(config)' ${DESTINATION_IS_MANIFEST}
+            config=$configuration yq e -i '.spec.configurations = (.spec.configurations // []) + env(config)' ${DESTINATION_IR_MANIFEST}
           done
         }
 
         if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-          create_integration_server
+          create_integration_runtime
         fi
     
     - name: update-kustomization
       env:
-        - name: DESTINATION_IS_MANIFEST
-          value: $(params.destination_is_manifest)
+        - name: DESTINATION_IR_MANIFEST
+          value: $(params.destination_ir_manifest)
         - name: KUSTOMIZATION_PATH
           value: $(params.kustomization-path)
       image: image-registry.openshift-image-registry.svc:5000/ci/sh-tools
@@ -150,7 +150,7 @@ spec:
 
         git checkout -b ${BRANCH_NAME}
         git add .
-        git commit -m "Add IntegrationServer"
+        git commit -m "Add IntegrationRuntime"
 
         git status
         git push --set-upstream origin ${BRANCH_NAME}

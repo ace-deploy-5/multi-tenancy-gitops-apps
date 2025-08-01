@@ -6,21 +6,21 @@ items:
     name: create-config
   spec:
     params:
-    - name: is-config-directory
+    - name: ir-config-directory
       type: string
-    - name: is-infra-directory
+    - name: ir-infra-directory
       type: string
-    - name: is-configuration-keystore
+    - name: ir-configuration-keystore
       type: string
-    - name: is-configuration-truststore
+    - name: ir-configuration-truststore
       type: string
-    - name: is-configuration-setdbparms
+    - name: ir-configuration-setdbparms
       type: string
-    - name: is-configuration-serverconf
+    - name: ir-configuration-runtimeconf
       type: string
-    - name: is-configuration-policyproject
+    - name: ir-configuration-policyproject
       type: string
-    - name: is-configuration-loopbackdatasource
+    - name: ir-configuration-loopbackdatasource
       type: string
     results:
     - description: ""
@@ -28,21 +28,21 @@ items:
     steps:
     - env:
       - name: IS_CONFIG_DIRECTORY
-        value: $(params.is-config-directory)
+        value: $(params.ir-config-directory)
       - name: IS_INFRA_DIRECTORY
-        value: $(params.is-infra-directory)
+        value: $(params.ir-infra-directory)
       - name: IS_CONFIGURATION_KEYSTORE
-        value: $(params.is-configuration-keystore)
+        value: $(params.ir-configuration-keystore)
       - name: IS_CONFIGURATION_TRUSTSTORE
-        value: $(params.is-configuration-truststore)
+        value: $(params.ir-configuration-truststore)
       - name: IS_CONFIGURATION_SETDBPARMS
-        value: $(params.is-configuration-setdbparms)
-      - name: IS_CONFIGURATION_SERVERCONF
-        value: $(params.is-configuration-serverconf)
+        value: $(params.ir-configuration-setdbparms)
+      - name: IS_CONFIGURATION_RUNTIMECONF
+        value: $(params.ir-configuration-runtimeconf)
       - name: IS_CONFIGURATION_POLICYPROJECT
-        value: $(params.is-configuration-policyproject)
+        value: $(params.ir-configuration-policyproject)
       - name: IS_CONFIGURATION_LOOPBACKDATASOURCE
-        value: $(params.is-configuration-loopbackdatasource)
+        value: $(params.ir-configuration-loopbackdatasource)
       - name: WORKSPACE_PATH
         value: $(workspaces.workspace.path)
       image: quay.io/hollisc/yq-zip
@@ -70,7 +70,7 @@ items:
 
             e=$sanitised_config_name yq e -i '.spec.secretName = env(e)' $rendered_config_directory/$sanitised_file_name.yaml
             ;;
-          serverconf)
+          runtimeconf)
             cp $config_template_path/configuration-with-data.yaml $rendered_config_directory/$sanitised_file_name.yaml
 
             contents=$(base64 -w 0 $config_definition_path/$config)
@@ -125,7 +125,7 @@ items:
 
         configurations=""
 
-        for config_type in IS_CONFIGURATION_SERVERCONF IS_CONFIGURATION_SETDBPARMS \
+        for config_type in IS_CONFIGURATION_RUNTIMECONF IS_CONFIGURATION_SETDBPARMS \
                       IS_CONFIGURATION_KEYSTORE IS_CONFIGURATION_TRUSTSTORE \
                       IS_CONFIGURATION_POLICYPROJECT IS_CONFIGURATION_LOOPBACKDATASOURCE; do
 
@@ -140,10 +140,10 @@ items:
 - apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
-    name: create-is
+    name: create-ir
   spec:
     params:
-    - name: is-infra-directory
+    - name: ir-infra-directory
       type: string
     - name: IMAGE
       type: string
@@ -156,20 +156,20 @@ items:
       name: setup-custom-resource
       resources: {}
       script: |
-        is_manifest_template=$(workspaces.input.path)/$(params.is-infra-directory)/IntegrationServer.yaml
+        ir_manifest_template=$(workspaces.input.path)/$(params.ir-infra-directory)/IntegrationRuntime.yaml
 
-        mkdir -p $(workspaces.input.path)/integration_server
-        is_manifest_rendered=$(workspaces.input.path)/integration_server/IntegrationServer.yaml
+        mkdir -p $(workspaces.input.path)/integration_runtime
+        ir_manifest_rendered=$(workspaces.input.path)/integration_runtime/IntegrationRuntime.yaml
 
-        cp $is_manifest_template $is_manifest_rendered
+        cp $ir_manifest_template $ir_manifest_rendered
 
-        e=$(params.release-name) yq e -i '.metadata.name = env(e)' $is_manifest_rendered
-        e=$(params.IMAGE) yq e -i '.spec.pod.containers.runtime.image = env(e)'  $is_manifest_rendered
+        e=$(params.release-name) yq e -i '.metadata.name = env(e)' $ir_manifest_rendered
+        e=$(params.IMAGE) yq e -i '.spec.pod.containers.runtime.image = env(e)'  $ir_manifest_rendered
 
         yq --version
 
         for configuration in $(params.configurations) ; do
-          config=$configuration yq e -i '.spec.configurations = (.spec.configurations // []) + env(config)' $is_manifest_rendered
+          config=$configuration yq e -i '.spec.configurations = (.spec.configurations // []) + env(config)' $ir_manifest_rendered
         done
       workingDir: $(workspaces.input.path)
     workspaces:
@@ -180,9 +180,9 @@ items:
     name: generate-bar
   spec:
     params:
-    - name: is-source-directory
+    - name: ir-source-directory
       type: string
-    - name: is-application-names
+    - name: ir-application-names
       type: string
     - name: bar-location
       type: string
@@ -195,8 +195,8 @@ items:
       script: |
         mkdir -p $(params.bar-location)
         mqsicreatebar.sh \
-          -data $(workspaces.workspace.path)/$(params.is-source-directory) \
-          -a $(params.is-application-names) \
+          -data $(workspaces.workspace.path)/$(params.ir-source-directory) \
+          -a $(params.ir-application-names) \
           -b $(params.bar-location)/$(params.bar-filename) -skipWSErrorCheck
     workspaces:
     - name: workspace
@@ -341,25 +341,25 @@ items:
     name: resolve-props
   spec:
     params:
-    - name: is-source-directory
+    - name: ir-source-directory
       type: string
     results:
     - description: ""
-      name: is-application-names
+      name: ir-application-names
     - description: ""
       name: release-name
     - description: ""
-      name: is-configuration-keystore
+      name: ir-configuration-keystore
     - description: ""
-      name: is-configuration-truststore
+      name: ir-configuration-truststore
     - description: ""
-      name: is-configuration-setdbparms
+      name: ir-configuration-setdbparms
     - description: ""
-      name: is-configuration-serverconf
+      name: ir-configuration-runtimeconf
     - description: ""
-      name: is-configuration-policyproject
+      name: ir-configuration-policyproject
     - description: ""
-      name: is-configuration-loopbackdatasource
+      name: ir-configuration-loopbackdatasource
     - description: ""
       name: mq-queue-name
     - description: ""
@@ -367,12 +367,12 @@ items:
     - description: ""
       name: registry-host
     - description: ""
-      name: previous-is-genenration
+      name: previous-ir-genenration
     - description: ""
       name: previous-deployment-revision
     - description: ""
       name: endpoint-path
-    - name: is-configurations
+    - name: ir-configurations
     steps:
     - image: quay.io/hollisc/yq-zip
       name: parse-source-properties
@@ -382,7 +382,7 @@ items:
 
         set -ex
 
-        properties_yaml_path=$(workspaces.input.path)/$(params.is-source-directory)/pipeline_properties.yaml
+        properties_yaml_path=$(workspaces.input.path)/$(params.ir-source-directory)/pipeline_properties.yaml
 
         if [[ ! -e $properties_yaml_path ]]; then
           echo "no pipeline property file found"
@@ -403,17 +403,17 @@ items:
           echo -n `yq e "$exp // \"\" " $properties_yaml_path` > $result_path
         }
 
-        resolve_props '.integrationServer.applicationNames' $(results.is-application-names.path)
-        resolve_prop '.integrationServer.releaseName' $(results.release-name.path)
+        resolve_props '.integrationRuntime.applicationNames' $(results.ir-application-names.path)
+        resolve_prop '.integrationRuntime.releaseName' $(results.release-name.path)
         
-        resolve_props '.integrationServer.configurations.keystore' $(results.is-configuration-keystore.path)
-        resolve_props '.integrationServer.configurations.truststore' $(results.is-configuration-truststore.path)
-        resolve_props '.integrationServer.configurations.setdbparms' $(results.is-configuration-setdbparms.path)
-        resolve_props '.integrationServer.configurations.serverconf' $(results.is-configuration-serverconf.path)
-        resolve_props '.integrationServer.configurations.policyproject' $(results.is-configuration-policyproject.path)
-        resolve_props '.integrationServer.configurations.loopbackdatasource' $(results.is-configuration-loopbackdatasource.path)
+        resolve_props '.integrationRuntime.configurations.keystore' $(results.ir-configuration-keystore.path)
+        resolve_props '.integrationRuntime.configurations.truststore' $(results.ir-configuration-truststore.path)
+        resolve_props '.integrationRuntime.configurations.setdbparms' $(results.ir-configuration-setdbparms.path)
+        resolve_props '.integrationRuntime.configurations.runtimeconf' $(results.ir-configuration-runtimeconf.path)
+        resolve_props '.integrationRuntime.configurations.policyproject' $(results.ir-configuration-policyproject.path)
+        resolve_props '.integrationRuntime.configurations.loopbackdatasource' $(results.ir-configuration-loopbackdatasource.path)
 
-        resolve_props '.integrationServer.configurations.*' $(results.is-configurations.path)
+        resolve_props '.integrationRuntime.configurations.*' $(results.ir-configurations.path)
 
         resolve_prop '.mq.queueName' $(results.mq-queue-name.path)
         resolve_prop '.mq.endPointPolicyFile' $(results.mq-end-point-policy-file.path)
@@ -426,11 +426,11 @@ items:
         echo $release_name
 
         set +e
-        previous_is_genenration=$(oc get integrationserver \
+        previous_ir_genenration=$(oc get integrationruntime \
                 $release_name -o jsonpath='{.metadata.generation}' 2>/dev/null)
         set +e
 
-        echo -n $previous_is_genenration > $(results.previous-is-genenration.path)
+        echo -n $previous_ir_genenration > $(results.previous-ir-genenration.path)
 
         if [[ ! -z $previous_is_genenration ]]; then
           oc get deployment \
