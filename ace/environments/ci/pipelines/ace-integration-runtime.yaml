@@ -1,14 +1,14 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: ace-integration-server
+  name: ace-integration-runtime
 spec:
   params:
-    - name: is-source-repo-url
+    - name: ir-source-repo-url
       type: string
       description: "SSH url of ACE source repository, ex: git@github.com:ace-prod-ref/create-customer.git"
 
-    - name: is-infra-repo-url
+    - name: ir-infra-repo-url
       type: string
       description: "SSH url of Infrastructure repository, ex: git@github.com:ace-prod-ref/ace-infra.git"
 
@@ -44,12 +44,12 @@ spec:
     - name: gitops-repo-secret
 
   tasks:
-    - name: clone-is-source-repo
+    - name: clone-ir-source-repo
       params:
         - name: url
-          value: $(params.is-source-repo-url)
+          value: $(params.ir-source-repo-url)
         - name: subdirectory
-          value: is-source
+          value: ir-source
         - name: deleteExisting
           value: "true"
       taskRef:
@@ -61,12 +61,12 @@ spec:
         - name: ssh-directory
           workspace: ace-source-repo-secret
 
-    - name: clone-is-infra-repo
+    - name: clone-ir-infra-repo
       params:
         - name: url
-          value: $(params.is-infra-repo-url)
+          value: $(params.ir-infra-repo-url)
         - name: subdirectory
-          value: is-infra
+          value: ir-infra
         - name: deleteExisting
           value: "true"
       taskRef:
@@ -97,10 +97,10 @@ spec:
 
     - name: resolve-props
       params:
-      - name: is-source-directory
-        value: is-source
+      - name: ir-source-directory
+        value: ir-source
       runAfter:
-        - clone-is-source-repo
+        - clone-ir-source-repo
       taskRef:
         kind: Task
         name: resolve-props
@@ -110,12 +110,12 @@ spec:
 
     - name: build-bar
       params:
-      - name: is-source-directory
-        value: is-source
-      - name: is-application-name
-        value: $(tasks.resolve-props.results.is-application-name)
-      - name: is-project
-        value: $(tasks.resolve-props.results.is-project)
+      - name: ir-source-directory
+        value: ir-source
+      - name: ir-application-name
+        value: $(tasks.resolve-props.results.ir-application-name)
+      - name: ir-project
+        value: $(tasks.resolve-props.results.ir-project)
       runAfter:
         - resolve-props
       taskRef:
@@ -125,20 +125,20 @@ spec:
       - name: workspace
         workspace: shared-workspace
 
-    - name: build-is-image
+    - name: build-ir-image
       params:
         - name: BUILD_EXTRA_ARGS
           value: --build-arg BASE=$(params.ace-base-image)
         - name: TLSVERIFY
           value: "false"
         - name: IMAGE
-          value: $(tasks.resolve-props.results.registry-host)/$(context.pipelineRun.namespace)/$(tasks.resolve-props.results.is-release-name):$(tasks.clone-is-source-repo.results.commit)
+          value: $(tasks.resolve-props.results.registry-host)/$(context.pipelineRun.namespace)/$(tasks.resolve-props.results.ir-release-name):$(tasks.clone-ir-source-repo.results.commit)
         - name: DOCKERFILE
-          value: $(workspaces.source.path)/is-infra/Dockerfile
+          value: $(workspaces.source.path)/ir-infra/Dockerfile
         - name: CONTEXT
           value: $(workspaces.source.path)/bars
       runAfter:
-        - clone-is-infra-repo
+        - clone-ir-infra-repo
         - build-bar
       taskRef:
         kind: ClusterTask
@@ -147,26 +147,26 @@ spec:
         - name: source
           workspace: shared-workspace
 
-    - name: build-integration-server
+    - name: build-integration-runtime
       params:
-        - name: is_manifest_template
-          value: "$(workspaces.input.path)/is-infra/IntegrationServer.yaml"
-        - name: destination_is_manifest
-          value: "$(workspaces.input.path)/gitops-repo/ace/environments/base/integrationServer/$(tasks.resolve-props.results.is-release-name).yaml"
+        - name: ir_manifest_template
+          value: "$(workspaces.input.path)/ir-infra/IntegrationServer.yaml" # !!!
+        - name: destination_ir_manifest
+          value: "$(workspaces.input.path)/gitops-repo/ace/environments/base/integrationServer/$(tasks.resolve-props.results.ir-release-name).yaml" # !!!
         - name: configurations
-          value: $(tasks.resolve-props.results.is-configurations)
+          value: $(tasks.resolve-props.results.ir-configurations)
         - name: name
-          value: $(tasks.resolve-props.results.is-release-name)
+          value: $(tasks.resolve-props.results.ir-release-name)
         - name: license
-          value: $(tasks.resolve-props.results.is-license)
+          value: $(tasks.resolve-props.results.ir-license)
         - name: license-use
-          value: $(tasks.resolve-props.results.is-license-use)
+          value: $(tasks.resolve-props.results.ir-license-use)
         - name: service-endpoint-type
-          value: $(tasks.resolve-props.results.is-service-endpoint-type)
+          value: $(tasks.resolve-props.results.ir-service-endpoint-type)
         - name: image
-          value: $(tasks.resolve-props.results.registry-host)/$(context.pipelineRun.namespace)/$(tasks.resolve-props.results.is-release-name):$(tasks.clone-is-source-repo.results.commit)
+          value: $(tasks.resolve-props.results.registry-host)/$(context.pipelineRun.namespace)/$(tasks.resolve-props.results.ir-release-name):$(tasks.clone-ir-source-repo.results.commit)
         - name: version
-          value: $(tasks.resolve-props.results.is-version)
+          value: $(tasks.resolve-props.results.ir-version)
         - name: kustomization-path
           value: "$(workspaces.input.path)/gitops-repo/ace/environments/base/kustomization.yaml"
         - name: user-name
@@ -180,11 +180,11 @@ spec:
         - name: repo-directory
           value: "gitops-repo"
       runAfter:
-        - build-is-image
+        - build-ir-image
         - clone-gitops-repo
       taskRef:
         kind: Task
-        name: build-integration-server
+        name: build-integration-runtime
       workspaces:
         - name: input
           workspace: shared-workspace
@@ -196,7 +196,7 @@ spec:
         kind: Task
         name: github-open-pr
       runAfter:
-        - build-integration-server
+        - build-integration-runtime
       params:
         - name: GITHUB_HOST_URL
           value: api.github.com

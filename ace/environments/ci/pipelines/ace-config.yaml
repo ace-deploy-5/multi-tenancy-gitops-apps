@@ -4,11 +4,11 @@ metadata:
   name: ace-config
 spec:
   params:
-    - name: is-config-repo-url
+    - name: ir-config-repo-url
       type: string
       description: "SSH url of Configuration repository, ex: git@github.com:ace-prod-ref/ace-config.git"
 
-    - name: is-infra-repo-url
+    - name: ir-infra-repo-url
       type: string
       description: "SSH url of Infrastructure repository, ex: git@github.com:ace-prod-ref/ace-infra.git"
 
@@ -40,12 +40,12 @@ spec:
     - name: gitops-repo-secret
 
   tasks:
-    - name: clone-is-config-repo
+    - name: clone-ir-config-repo
       params:
         - name: url
-          value: $(params.is-config-repo-url)
+          value: $(params.ir-config-repo-url)
         - name: subdirectory
-          value: is-config
+          value: ir-config
         - name: deleteExisting
           value: "true"
       taskRef:
@@ -58,12 +58,12 @@ spec:
         - name: ssh-directory
           workspace: ace-config-repo-secret
 
-    - name: clone-is-infra-repo
+    - name: clone-ir-infra-repo
       params:
         - name: url
-          value: $(params.is-infra-repo-url)
+          value: $(params.ir-infra-repo-url)
         - name: subdirectory
-          value: is-infra
+          value: ir-infra
         - name: deleteExisting
           value: "true"
       taskRef:
@@ -96,10 +96,10 @@ spec:
 
     - name: resolve-props
       params:
-        - name: is-source-directory
-          value: is-config
+        - name: ir-source-directory
+          value: ir-config
       runAfter:
-        - clone-is-config-repo
+        - clone-ir-config-repo
       taskRef:
         kind: Task
         name: resolve-props
@@ -110,22 +110,22 @@ spec:
 
     - name: create-config
       params:
-        - name: is-config-directory
-          value: is-config
-        - name: is-infra-directory
-          value: is-infra
-        - name: is-configuration-keystore
-          value: $(tasks.resolve-props.results.is-configuration-keystore)
-        - name: is-configuration-truststore
-          value: $(tasks.resolve-props.results.is-configuration-truststore)
-        - name: is-configuration-setdbparms
-          value: $(tasks.resolve-props.results.is-configuration-setdbparms)
-        - name: is-configuration-serverconf
-          value: $(tasks.resolve-props.results.is-configuration-serverconf)
-        - name: is-configuration-policyproject
-          value: $(tasks.resolve-props.results.is-configuration-policyproject)
-        - name: is-configuration-loopbackdatasource
-          value: $(tasks.resolve-props.results.is-configuration-loopbackdatasource)
+        - name: ir-config-directory
+          value: ir-config
+        - name: ir-infra-directory
+          value: ir-infra
+        - name: ir-configuration-keystore
+          value: $(tasks.resolve-props.results.ir-configuration-keystore)
+        - name: ir-configuration-truststore
+          value: $(tasks.resolve-props.results.ir-configuration-truststore)
+        - name: ir-configuration-setdbparms
+          value: $(tasks.resolve-props.results.ir-configuration-setdbparms)
+        - name: ir-configuration-runtimeconf
+          value: $(tasks.resolve-props.results.ir-configuration-runtimeconf)
+        - name: ir-configuration-policyproject
+          value: $(tasks.resolve-props.results.ir-configuration-policyproject)
+        - name: ir-configuration-loopbackdatasource
+          value: $(tasks.resolve-props.results.ir-configuration-loopbackdatasource)
         - name: rendered-config-directory
           value: gitops-repo/ace/environments/base/configurations
         - name: repo-directory
@@ -140,7 +140,7 @@ spec:
           value: $(context.pipeline.name)-$(context.pipelineRun.name)
       runAfter:
         - resolve-props
-        - clone-is-infra-repo
+        - clone-ir-infra-repo
         - clone-gitops-repo
       taskRef:
         kind: Task

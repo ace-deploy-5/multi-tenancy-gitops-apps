@@ -5,13 +5,13 @@ metadata:
 spec:
   params:
   - default: https://github.com/cloud-native-toolkit-demos/ace-customer-details.git
-    name: is-source-repo-url
+    name: ir-source-repo-url
     type: string
-  - default: is-source
-    name: is-source-directory
+  - default: ir-source
+    name: ir-source-directory
     type: string
   - default: '""'
-    name: is-source-repo-private-key
+    name: ir-source-repo-private-key
     type: string
 
   - default: ibm-client-key-certs
@@ -38,16 +38,16 @@ spec:
 
   tasks:
 
-  - name: clone-is-source
+  - name: clone-ir-source
     params:
     - name: url
-      value: $(params.is-source-repo-url)
+      value: $(params.ir-source-repo-url)
     - name: subdirectory
-      value: $(params.is-source-directory)
+      value: $(params.ir-source-directory)
     - name: deleteExisting
       value: "true"
     - name: sshPrivateKey
-      value: $(params.is-source-repo-private-key)
+      value: $(params.ir-source-repo-private-key)
     taskRef:
       kind: Task
       name: git-clone
@@ -57,10 +57,10 @@ spec:
 
   - name: resolve-props
     params:
-    - name: is-source-directory
-      value: $(params.is-source-directory)
+    - name: ir-source-directory
+      value: $(params.ir-source-directory)
     runAfter:
-    - clone-is-source
+    - clone-ir-source
     taskRef:
       kind: Task
       name: resolve-props
@@ -72,8 +72,8 @@ spec:
     params:
     - name: source-env
       value: $(params.source-env)
-    - name: is-source-directory
-      value: $(params.is-source-directory)
+    - name: ir-source-directory
+      value: $(params.ir-source-directory)
     - name: release-name
       value: create-customer-details-rest
     - name: endpoint-path
