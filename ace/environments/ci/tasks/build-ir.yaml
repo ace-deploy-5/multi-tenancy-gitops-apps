@@ -47,7 +47,7 @@ spec:
         - name: DESTINATION_IR_MANIFEST
           value: $(params.destination_ir_manifest)
         - name: CONFIGURATIONS
-          value: $(params.configurations)z
+          value: $(params.configurations)
         - name: NAME
           value: $(params.name)
         - name: LICENSE
@@ -89,7 +89,7 @@ spec:
 
         function update_kustomization() {
           local kustomization_path_dir=$(dirname ${KUSTOMIZATION_PATH})
-          local relative_path_to_item=$(realpath ${DESTINATION_IS_MANIFEST} \
+          local relative_path_to_item=$(realpath ${DESTINATION_IR_MANIFEST} \
             --relative-to ${kustomization_path_dir})
 
           local contains=$(config=${relative_path_to_item} yq e '.resources[] | select(. == env(config))' \
